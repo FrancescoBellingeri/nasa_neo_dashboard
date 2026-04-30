@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     cache_ttl_neo: int = 86400
     cache_ttl_stats: int = 1800
 
+    log_level: str = "INFO"
     max_date_range_days: int = 90
 
 

@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1.router import v1_router
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=settings.log_level.upper())
 
 app = FastAPI(
     title="NASA NEO Dashboard API",
