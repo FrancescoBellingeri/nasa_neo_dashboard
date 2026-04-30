@@ -78,7 +78,7 @@ export function AsteroidTable({
   onPageChange,
 }: AsteroidTableProps) {
   return (
-    <div className="rounded-xl border border-border/50 bg-card/50 flex flex-col gap-0 overflow-hidden">
+    <div className="rounded-xl border border-border bg-card flex flex-col gap-0 overflow-hidden">
       {/* Filter bar */}
       <div className="px-4 py-3 border-b border-border/30">
         <FilterPanel
@@ -97,11 +97,11 @@ export function AsteroidTable({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-border/30 bg-background/40">
+            <tr className="border-b border-border bg-muted/30">
               {COL_HEADERS.map((h) => (
                 <th
                   key={h.label}
-                  className={`py-2.5 px-3 text-left text-xs font-mono uppercase tracking-wider text-muted-foreground ${h.width}`}
+                  className={`py-3 px-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground ${h.width}`}
                 >
                   {h.label}
                 </th>

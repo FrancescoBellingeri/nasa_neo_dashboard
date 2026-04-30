@@ -9,14 +9,12 @@ interface ChartCardProps {
 
 export function ChartCard({ title, children, loading, className = "" }: ChartCardProps) {
   return (
-    <div className={`rounded-xl border border-border/50 bg-card/50 p-4 flex flex-col gap-3 ${className}`}>
-      <h2 className="text-xs font-semibold font-mono uppercase tracking-wider text-muted-foreground">
+    <div className={`rounded-xl border border-border bg-card flex flex-col gap-4 p-5 ${className}`}>
+      <h2 className="text-sm font-semibold text-foreground">
         {title}
       </h2>
       {loading ? (
-        <div className="flex-1 flex items-center justify-center min-h-[200px]">
-          <Skeleton className="w-full h-full min-h-[200px] rounded-lg" />
-        </div>
+        <Skeleton className="w-full min-h-[200px] rounded-lg" />
       ) : (
         children
       )}

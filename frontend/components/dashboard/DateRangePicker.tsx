@@ -54,7 +54,7 @@ export function DateRangePicker({
           max={endDate}
           disabled={isLoading}
           onChange={(e) => onDateChange(e.target.value, endDate)}
-          className="h-8 w-36 font-mono text-xs bg-card/50"
+          className="h-8 w-36 text-sm bg-card"
         />
         <span className="text-muted-foreground text-xs">→</span>
         <Input
@@ -64,7 +64,7 @@ export function DateRangePicker({
           max={todayISO()}
           disabled={isLoading}
           onChange={(e) => onDateChange(startDate, e.target.value)}
-          className="h-8 w-36 font-mono text-xs bg-card/50"
+          className="h-8 w-36 text-sm bg-card"
         />
       </div>
 

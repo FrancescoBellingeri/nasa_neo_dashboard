@@ -174,6 +174,9 @@ You can obtain a free API key from the official NASA API portal.
 
 ```
 cd backend
+python -m venv venv
+source venv/bin/activate          # On Windows use: venv\Scripts\activate
+pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
@@ -209,9 +212,23 @@ http://localhost:3000
 
 ## 🚀 Deployment
 
-* Deploy backend on Railway / Render / Fly.io
-* Deploy frontend on Vercel
-* Store environment variables securely in platform settings
+### Backend → Render
+
+1. Push repo to GitHub
+2. [render.com](https://render.com) → New → Blueprint → connect repo → point to `backend/render.yaml`
+3. Render creates web service + Redis automatically
+4. Add env vars in the Render dashboard:
+   - `NASA_API_KEY` — get free key at [api.nasa.gov](https://api.nasa.gov)
+   - `FRONTEND_URL` — your Vercel URL (add after frontend deploy)
+5. Copy the Render service URL (e.g. `https://nasa-neo-backend.onrender.com`)
+
+### Frontend → Vercel
+
+1. [vercel.com](https://vercel.com) → New Project → import repo
+2. Set **Root Directory** → `frontend`
+3. Add env var:
+   - `NEXT_PUBLIC_BACKEND_URL` = your Render backend URL
+4. Deploy
 
 ---
 

@@ -4,10 +4,6 @@ import { useEffect, useRef } from "react";
 
 import type { OrbitalData } from "@/lib/types";
 
-interface OrbitalDataPanelProps {
-  orbital: OrbitalData | null;
-}
-
 function OrbitCanvas({ orbital }: { orbital: OrbitalData }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
@@ -26,36 +22,35 @@ function OrbitCanvas({ orbital }: { orbital: OrbitalData }) {
 
     const sma = parseFloat(orbital.semi_major_axis ?? "1.5");
     const ecc = Math.min(parseFloat(orbital.eccentricity ?? "0.2"), 0.98);
-    const period = parseFloat(orbital.orbital_period ?? "500") / 365.25; // years
+    const period = parseFloat(orbital.orbital_period ?? "500") / 365.25;
+
+    if (isNaN(sma) || isNaN(ecc) || isNaN(period)) return;
 
     const a = sma * AU;
     const b = a * Math.sqrt(1 - ecc * ecc);
-    const focalDist = a * ecc; // distance from ellipse center to focus
+    const focalDist = a * ecc;
+
+    const seeds = [17, 37, 53, 71, 89, 113, 137, 157, 173, 193, 211, 229];
 
     function drawStars() {
-      ctx!.fillStyle = "rgba(255,255,255,0.5)";
-      // deterministic star positions via seeded values
-      const seeds = [17, 37, 53, 71, 89, 113, 137, 157, 173, 193, 211, 229];
       seeds.forEach((s, i) => {
-        const x = ((s * 97 + i * 43) % W);
-        const y = ((s * 53 + i * 71) % H);
-        const r = (s % 3 === 0) ? 1.5 : 1;
+        const x = (s * 97 + i * 43) % W;
+        const y = (s * 53 + i * 71) % H;
+        ctx!.fillStyle = "rgba(255,255,255,0.45)";
         ctx!.beginPath();
-        ctx!.arc(x, y, r, 0, Math.PI * 2);
+        ctx!.arc(x, y, s % 3 === 0 ? 1.5 : 1, 0, Math.PI * 2);
         ctx!.fill();
       });
     }
 
     function draw(timestamp: number) {
       ctx!.clearRect(0, 0, W, H);
-
-      // Background
-      ctx!.fillStyle = "oklch(0.06 0.01 265)";
+      ctx!.fillStyle = "oklch(0.12 0.018 265)";
       ctx!.fillRect(0, 0, W, H);
 
       drawStars();
 
-      // Earth orbit reference (1 AU ring)
+      // Earth orbit ring (1 AU)
       ctx!.strokeStyle = "rgba(99,102,241,0.2)";
       ctx!.lineWidth = 1;
       ctx!.setLineDash([4, 4]);
@@ -64,9 +59,9 @@ function OrbitCanvas({ orbital }: { orbital: OrbitalData }) {
       ctx!.stroke();
       ctx!.setLineDash([]);
 
-      // Asteroid orbit ellipse — focus (Sun) at cx,cy
+      // Asteroid orbit ellipse
       const orbitCx = cx + focalDist;
-      ctx!.strokeStyle = "rgba(245,158,11,0.35)";
+      ctx!.strokeStyle = "rgba(245,158,11,0.4)";
       ctx!.lineWidth = 1.5;
       ctx!.setLineDash([3, 5]);
       ctx!.beginPath();
@@ -87,12 +82,11 @@ function OrbitCanvas({ orbital }: { orbital: OrbitalData }) {
       ctx!.arc(cx, cy, 5, 0, Math.PI * 2);
       ctx!.fill();
 
-      // Earth — orbits Sun at 1 AU, 1 year period
-      const earthT = timestamp / 1000 / 365.25 / (365.25 * 0.01);
+      // Earth
+      const earthT = timestamp / 1000 / (365.25 * 0.01);
       const earthAngle = (earthT * Math.PI * 2) % (Math.PI * 2);
       const ex = cx + Math.cos(earthAngle) * AU;
       const ey = cy + Math.sin(earthAngle) * AU;
-
       const earthGrad = ctx!.createRadialGradient(ex, ey, 0, ex, ey, 7);
       earthGrad.addColorStop(0, "#93c5fd");
       earthGrad.addColorStop(1, "#1d4ed8");
@@ -100,33 +94,26 @@ function OrbitCanvas({ orbital }: { orbital: OrbitalData }) {
       ctx!.beginPath();
       ctx!.arc(ex, ey, 5, 0, Math.PI * 2);
       ctx!.fill();
+      ctx!.font = "9px monospace";
+      ctx!.fillStyle = "rgba(147,197,253,0.7)";
+      ctx!.fillText("Earth", ex + 7, ey - 4);
 
-      // Asteroid — orbits along its ellipse
+      // Asteroid
       const asteroidT = timestamp / 1000 / (period * 365.25 * 0.01);
       const asteroidAngle = (asteroidT * Math.PI * 2) % (Math.PI * 2);
       const ax2 = orbitCx + Math.cos(asteroidAngle) * a;
       const ay2 = cy + Math.sin(asteroidAngle) * b;
-
-      // Glow
       const astGrad = ctx!.createRadialGradient(ax2, ay2, 0, ax2, ay2, 8);
-      astGrad.addColorStop(0, "rgba(245,158,11,0.8)");
+      astGrad.addColorStop(0, "rgba(245,158,11,0.9)");
       astGrad.addColorStop(1, "rgba(245,158,11,0)");
       ctx!.fillStyle = astGrad;
       ctx!.beginPath();
       ctx!.arc(ax2, ay2, 8, 0, Math.PI * 2);
       ctx!.fill();
-
       ctx!.fillStyle = "#f59e0b";
       ctx!.beginPath();
       ctx!.arc(ax2, ay2, 3, 0, Math.PI * 2);
       ctx!.fill();
-
-      // Legend
-      ctx!.font = "9px monospace";
-      ctx!.fillStyle = "rgba(255,255,255,0.4)";
-      ctx!.fillText("☀ Sun", cx + 8, cy - 8);
-      ctx!.fillStyle = "rgba(147,197,253,0.7)";
-      ctx!.fillText("🌍 Earth", ex + 7, ey - 5);
 
       rafRef.current = requestAnimationFrame(draw);
     }
@@ -138,67 +125,60 @@ function OrbitCanvas({ orbital }: { orbital: OrbitalData }) {
   return (
     <canvas
       ref={canvasRef}
-      width={320}
-      height={220}
+      width={500}
+      height={200}
       className="rounded-lg w-full"
-      style={{ maxWidth: 320 }}
     />
   );
 }
 
-const ORBITAL_LABELS: Record<string, string> = {
-  orbit_class: "Orbit Class",
-  semi_major_axis: "Semi-major Axis (AU)",
-  eccentricity: "Eccentricity",
-  inclination: "Inclination (°)",
-  orbital_period: "Period (days)",
-  perihelion_distance: "Perihelion (AU)",
-  aphelion_distance: "Aphelion (AU)",
-  ascending_node_longitude: "Ascending Node (°)",
-  first_observation_date: "First Observed",
-  last_observation_date: "Last Observed",
-};
+const ORBITAL_ROWS: { key: keyof OrbitalData; label: string }[] = [
+  { key: "orbit_class", label: "Orbit Class" },
+  { key: "semi_major_axis", label: "Semi-major Axis (AU)" },
+  { key: "eccentricity", label: "Eccentricity" },
+  { key: "inclination", label: "Inclination (°)" },
+  { key: "orbital_period", label: "Period (days)" },
+  { key: "perihelion_distance", label: "Perihelion (AU)" },
+  { key: "aphelion_distance", label: "Aphelion (AU)" },
+  { key: "first_observation_date", label: "First Observed" },
+  { key: "last_observation_date", label: "Last Observed" },
+];
 
-export function OrbitalDataPanel({ orbital }: OrbitalDataPanelProps) {
+export function OrbitalDataPanel({ orbital }: { orbital: OrbitalData | null }) {
   if (!orbital) {
     return (
-      <div className="rounded-lg border border-border/30 px-4 py-6 text-center text-xs text-muted-foreground font-mono">
+      <p className="text-xs text-muted-foreground font-mono text-center py-4">
         No orbital data available
-      </div>
+      </p>
     );
   }
 
-  const displayKeys = Object.keys(ORBITAL_LABELS).filter(
-    (k) => orbital[k as keyof OrbitalData] != null
-  );
+  const hasCanvas = !!(orbital.semi_major_axis || orbital.eccentricity);
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col sm:flex-row gap-4 items-start">
-        {(orbital.semi_major_axis || orbital.eccentricity) && (
-          <OrbitCanvas orbital={orbital} />
-        )}
-        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
-          {displayKeys.map((k) => (
-            <div key={k} className="flex flex-col">
-              <span className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
-                {ORBITAL_LABELS[k]}
-              </span>
-              <span className="text-sm font-mono text-foreground truncate">
-                {String(orbital[k as keyof OrbitalData])}
-              </span>
-            </div>
-          ))}
-          {orbital.orbit_class_description && (
-            <div className="col-span-2 flex flex-col">
-              <span className="text-xs text-muted-foreground font-mono uppercase tracking-wider">Description</span>
-              <span className="text-xs font-mono text-muted-foreground leading-relaxed">
-                {orbital.orbit_class_description}
-              </span>
-            </div>
-          )}
-        </div>
+      {/* Canvas full width on top */}
+      {hasCanvas && <OrbitCanvas orbital={orbital} />}
+
+      {/* Data grid below — 2 columns, plenty of space */}
+      <div className="grid grid-cols-2 gap-x-8 gap-y-2.5">
+        {ORBITAL_ROWS.filter((r) => orbital[r.key] != null).map(({ key, label }) => (
+          <div key={key} className="flex flex-col gap-0.5">
+            <span className="text-xs text-muted-foreground uppercase tracking-wide">
+              {label}
+            </span>
+            <span className="text-sm font-medium text-foreground break-words">
+              {String(orbital[key])}
+            </span>
+          </div>
+        ))}
       </div>
+
+      {orbital.orbit_class_description && (
+        <p className="text-xs text-muted-foreground leading-relaxed border-t border-border pt-3">
+          {orbital.orbit_class_description}
+        </p>
+      )}
     </div>
   );
 }

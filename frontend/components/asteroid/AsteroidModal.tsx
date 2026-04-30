@@ -15,7 +15,7 @@ export function AsteroidModal({ asteroid }: AsteroidModalProps) {
 
   return (
     <Dialog open onOpenChange={() => router.back()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 bg-card border-border/60">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 bg-card border-border/60">
         <DialogTitle className="sr-only">{asteroid.name}</DialogTitle>
         <DialogDescription className="sr-only">
           Asteroid detail: danger score {asteroid.danger_score}/100,{" "}
