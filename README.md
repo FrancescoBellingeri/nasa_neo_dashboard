@@ -3,6 +3,8 @@
 A full-stack dashboard to explore near-Earth asteroids using real NASA data.
 This project transforms raw data into clear, interactive, and meaningful visualizations.
 
+**🌐 Live Demo:** [https://nasa-neo-dashboard.vercel.app/](https://nasa-neo-dashboard.vercel.app/)
+
 ---
 
 ## 📌 Overview
