@@ -128,12 +128,21 @@ backend/
 │   │   └── v1/
 │   │       ├── router.py
 │   │       └── endpoints/
-│   ├── services/
-│   │   └── nasa_client.py
+│   │           ├── feed.py     # GET /api/v1/feed
+│   │           ├── neo.py      # GET /api/v1/neo/{id}
+│   │           └── stats.py    # GET /api/v1/stats
 │   ├── core/
-│   │   └── config.py
-│   ├── db/
-│   └── schemas/
+│   │   ├── config.py           # pydantic-settings (API key, Redis URL, TTLs)
+│   │   └── cache.py            # Redis client + cache-aside helpers
+│   ├── schemas/
+│   │   ├── neo.py              # Asteroid, CloseApproach, FeedResponse
+│   │   └── stats.py            # StatsResponse, chart data models
+│   └── services/
+│       ├── nasa_client.py      # HTTPX async client, custom exceptions
+│       ├── chunker.py          # splits date range into 7-day chunks
+│       └── transformer.py      # raw NASA JSON → schemas + danger_score
+├── Dockerfile
+├── render.yaml
 ├── requirements.txt
 └── .env
 ```
@@ -145,12 +154,53 @@ backend/
 ```
 frontend/
 ├── app/
+│   ├── layout.tsx              # dark theme, parallel route slot {modal}
+│   ├── page.tsx                # Server Component, initial 7-day fetch
+│   ├── loading.tsx
+│   ├── error.tsx
+│   ├── not-found.tsx
+│   ├── globals.css
+│   ├── @modal/
+│   │   ├── default.tsx
+│   │   └── (.)asteroids/[id]/
+│   │       └── page.tsx        # intercepting route → modal overlay
+│   └── asteroids/[id]/
+│       ├── page.tsx            # full asteroid detail page
+│       └── loading.tsx
 ├── components/
-│   ├── ui/
-│   └── charts/
-├── lib/
+│   ├── ui/                     # shadcn: badge, button, dialog, input,
+│   │                           #         select, skeleton, table, tooltip
+│   ├── layout/
+│   │   ├── Header.tsx
+│   │   └── LiveStatsBar.tsx
+│   ├── dashboard/
+│   │   ├── DashboardClient.tsx
+│   │   ├── DateRangePicker.tsx
+│   │   ├── FilterPanel.tsx     # search, sort, hazardous toggle, CSV export
+│   │   ├── AsteroidTable.tsx
+│   │   ├── AsteroidRow.tsx
+│   │   ├── DangerBadge.tsx     # SVG ring colored by danger_score
+│   │   └── ThreatPanel.tsx     # top hazardous with live countdown
+│   ├── charts/
+│   │   ├── ChartCard.tsx
+│   │   ├── DistanceTimeline.tsx
+│   │   ├── SizeHistogram.tsx
+│   │   ├── HazardDonut.tsx
+│   │   └── VelocityChart.tsx
+│   └── asteroid/
+│       ├── AsteroidDetailCard.tsx
+│       ├── AsteroidModal.tsx
+│       ├── CloseApproachTable.tsx
+│       └── OrbitalDataPanel.tsx  # canvas orbit simulator
 ├── hooks/
-└── styles/
+│   ├── useFeed.ts              # date range, filters, sort, pagination state
+│   └── useDebounce.ts
+├── lib/
+│   ├── api.ts                  # typed fetch wrappers for all endpoints
+│   ├── types.ts                # all TS interfaces
+│   ├── formatters.ts           # formatKm, formatKph, formatDate, etc.
+│   └── utils.ts
+└── .env.local
 ```
 
 ---

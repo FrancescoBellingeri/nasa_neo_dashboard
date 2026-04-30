@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { AlertCircle, RefreshCw } from "lucide-react";
 
@@ -26,15 +26,21 @@ export function DashboardClient({ initialFeed, initialStats }: DashboardClientPr
   const feed = useFeed(initialFeed);
   const [stats, setStats] = useState<StatsResponse | null>(initialStats);
   const [statsLoading, setStatsLoading] = useState(false);
+  const statsAbortRef = useRef<AbortController | null>(null);
 
   const loadStats = useCallback(async (start: string, end: string) => {
+    if (statsAbortRef.current) statsAbortRef.current.abort();
+    statsAbortRef.current = new AbortController();
+    const { signal } = statsAbortRef.current;
+
     setStatsLoading(true);
     try {
-      const s = await fetchStats(start, end);
+      const s = await fetchStats(start, end, signal);
       setStats(s);
-    } catch {
+      setStatsLoading(false);
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return;
       // stats failure is non-fatal — feed still shows
-    } finally {
       setStatsLoading(false);
     }
   }, []);

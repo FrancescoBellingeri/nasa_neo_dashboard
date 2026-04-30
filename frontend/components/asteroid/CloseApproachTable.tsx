@@ -1,14 +1,24 @@
+"use client";
+
+import { useState } from "react";
+
 import { formatDate, formatKm, formatKph } from "@/lib/formatters";
 import type { CloseApproach } from "@/lib/types";
+
+const VISIBLE_DEFAULT = 10;
 
 interface CloseApproachTableProps {
   approaches: CloseApproach[];
 }
 
 export function CloseApproachTable({ approaches }: CloseApproachTableProps) {
+  const [showAll, setShowAll] = useState(false);
+
   const sorted = [...approaches].sort(
     (a, b) => b.close_approach_date.localeCompare(a.close_approach_date)
   );
+  const visible = showAll ? sorted : sorted.slice(0, VISIBLE_DEFAULT);
+  const hasMore = sorted.length > VISIBLE_DEFAULT;
 
   return (
     <div className="rounded-lg border border-border/50 overflow-hidden">
@@ -17,7 +27,7 @@ export function CloseApproachTable({ approaches }: CloseApproachTableProps) {
           Close Approach History ({approaches.length})
         </h3>
       </div>
-      <div className="overflow-x-auto max-h-64">
+      <div className="overflow-x-auto">
         <table className="w-full text-xs font-mono">
           <thead className="sticky top-0 bg-card/80 backdrop-blur-sm">
             <tr className="border-b border-border/30">
@@ -28,7 +38,7 @@ export function CloseApproachTable({ approaches }: CloseApproachTableProps) {
             </tr>
           </thead>
           <tbody>
-            {sorted.map((a, i) => (
+            {visible.map((a, i) => (
               <tr
                 key={i}
                 className="border-b border-border/20 hover:bg-primary/5 transition-colors"
@@ -42,6 +52,16 @@ export function CloseApproachTable({ approaches }: CloseApproachTableProps) {
           </tbody>
         </table>
       </div>
+      {hasMore && (
+        <button
+          onClick={() => setShowAll((v) => !v)}
+          className="w-full px-4 py-2 text-xs font-mono text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-colors border-t border-border/20"
+        >
+          {showAll
+            ? "Show less"
+            : `Show all ${sorted.length} approaches`}
+        </button>
+      )}
     </div>
   );
 }

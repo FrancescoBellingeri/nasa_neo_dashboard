@@ -30,21 +30,23 @@ async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
 
 export async function fetchFeed(
   startDate: string,
-  endDate: string
+  endDate: string,
+  signal?: AbortSignal
 ): Promise<FeedResponse> {
   return apiFetch<FeedResponse>(
     `/api/v1/feed?start_date=${startDate}&end_date=${endDate}`,
-    { cache: "no-store" }
+    { cache: "no-store", signal }
   );
 }
 
 export async function fetchStats(
   startDate: string,
-  endDate: string
+  endDate: string,
+  signal?: AbortSignal
 ): Promise<StatsResponse> {
   return apiFetch<StatsResponse>(
     `/api/v1/stats?start_date=${startDate}&end_date=${endDate}`,
-    { cache: "no-store" }
+    { cache: "no-store", signal }
   );
 }
 

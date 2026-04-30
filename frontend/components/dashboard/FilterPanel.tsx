@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDebounce } from "@/hooks/useDebounce";
-import { formatDate, formatDiameter, formatKm, formatKph } from "@/lib/formatters";
 import type { Asteroid, FeedFilters, SortDirection, SortField } from "@/lib/types";
 import { useEffect, useState } from "react";
 
@@ -68,12 +67,14 @@ export function FilterPanel({
   onSortChange,
 }: FilterPanelProps) {
   const [searchInput, setSearchInput] = useState(filters.nameSearch);
+
   const debounced = useDebounce(searchInput, 250);
 
   useEffect(() => {
     onFilterChange({ nameSearch: debounced });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debounced]);
+
 
   const hazardOptions = [
     { label: "All", value: "all" },
@@ -85,8 +86,8 @@ export function FilterPanel({
     filters.hazardousOnly === true
       ? "hazardous"
       : filters.hazardousOnly === false
-      ? "safe"
-      : "all";
+        ? "safe"
+        : "all";
 
   const handleHazard = (v: string) => {
     onFilterChange({
@@ -95,77 +96,75 @@ export function FilterPanel({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      {/* Search */}
-      <div className="relative flex-1 min-w-[180px] max-w-xs">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-        <Input
-          placeholder="Search asteroid…"
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          className="h-8 pl-8 font-mono text-xs bg-card/50"
-        />
-      </div>
-
-      {/* Hazard filter */}
-      <div className="flex items-center gap-1">
-        {hazardOptions.map((opt) => (
-          <Button
-            key={opt.value}
-            variant={currentHazard === opt.value ? "default" : "outline"}
-            size="sm"
-            onClick={() => handleHazard(opt.value)}
-            className="h-8 text-xs font-mono"
-          >
-            {opt.label}
-          </Button>
-        ))}
-      </div>
-
-      {/* Sort */}
-      <div className="flex items-center gap-1.5">
-        <Select
-          value={sortField}
-          onValueChange={(v) => onSortChange(v as SortField, sortDir)}
-        >
-          <SelectTrigger className="h-8 w-36 text-xs font-mono bg-card/50">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {SORT_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value} className="text-xs font-mono">
-                {o.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+    <div className="flex flex-col gap-2">
+      {/* Row 1: search + export */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Input
+            placeholder="Search asteroid…"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="h-8 pl-8 font-mono text-xs bg-card/50 w-full"
+          />
+        </div>
         <Button
           variant="outline"
           size="sm"
-          className="h-8 w-8 p-0"
-          onClick={() => onSortChange(sortField, sortDir === "asc" ? "desc" : "asc")}
-          title={sortDir === "asc" ? "Ascending" : "Descending"}
+          className="h-8 text-xs font-mono shrink-0"
+          onClick={() => exportCSV(allAsteroids)}
+          disabled={allAsteroids.length === 0}
         >
-          <ArrowUpDown className="h-3.5 w-3.5" />
+          <Download className="h-3.5 w-3.5 mr-1.5" />
+          Export CSV
         </Button>
       </div>
 
-      {/* Count */}
-      <Badge variant="outline" className="font-mono text-xs h-8 px-3">
-        {totalFiltered} / {totalAll}
-      </Badge>
-
-      {/* CSV export */}
-      <Button
-        variant="outline"
-        size="sm"
-        className="h-8 text-xs font-mono ml-auto"
-        onClick={() => exportCSV(allAsteroids)}
-        disabled={allAsteroids.length === 0}
-      >
-        <Download className="h-3.5 w-3.5 mr-1.5" />
-        Export CSV
-      </Button>
+      {/* Row 2: hazard toggle + sort + count */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-1">
+          {hazardOptions.map((opt) => (
+            <Button
+              key={opt.value}
+              variant={currentHazard === opt.value ? "default" : "outline"}
+              size="sm"
+              onClick={() => handleHazard(opt.value)}
+              className="h-8 text-xs font-mono"
+            >
+              {opt.label}
+            </Button>
+          ))}
+        </div>
+        <div className="flex items-center gap-1">
+          <Select
+            value={sortField}
+            onValueChange={(v) => onSortChange(v as SortField, sortDir)}
+          >
+            <SelectTrigger className="h-8 w-36 text-xs font-mono bg-card/50">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SORT_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value} className="text-xs font-mono">
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 w-8 p-0"
+            onClick={() => onSortChange(sortField, sortDir === "asc" ? "desc" : "asc")}
+            title={sortDir === "asc" ? "Ascending" : "Descending"}
+          >
+            <ArrowUpDown className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+        <Badge variant="outline" className="font-mono text-xs h-8 px-3">
+          {totalFiltered} / {totalAll}
+        </Badge>
+      </div>
     </div>
   );
 }

@@ -28,7 +28,7 @@ export function useFeed(initialData?: FeedResponse | null) {
     errorCode: null,
     startDate: daysAgoISO(7),
     endDate: todayISO(),
-    filters: { hazardousOnly: null, nameSearch: "" },
+    filters: { hazardousOnly: null, nameSearch: "", distanceMin: null, distanceMax: null },
     sortField: "miss_distance_km",
     sortDir: "asc",
     page: 1,
@@ -40,13 +40,15 @@ export function useFeed(initialData?: FeedResponse | null) {
   const load = useCallback(async (start: string, end: string) => {
     if (abortRef.current) abortRef.current.abort();
     abortRef.current = new AbortController();
+    const { signal } = abortRef.current;
 
     setState((s) => ({ ...s, isLoading: true, error: null, errorCode: null, page: 1 }));
 
     try {
-      const data = await fetchFeed(start, end);
+      const data = await fetchFeed(start, end, signal);
       setState((s) => ({ ...s, data, isLoading: false }));
     } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return;
       const e = err as Error & { status?: number; code?: string };
       setState((s) => ({
         ...s,
@@ -97,6 +99,14 @@ export function useFeed(initialData?: FeedResponse | null) {
     if (state.filters.nameSearch) {
       const q = state.filters.nameSearch.toLowerCase();
       list = list.filter((a) => a.name.toLowerCase().includes(q));
+    }
+
+    if (state.filters.distanceMin !== null) {
+      list = list.filter((a) => a.close_approach.miss_distance_km >= state.filters.distanceMin!);
+    }
+
+    if (state.filters.distanceMax !== null) {
+      list = list.filter((a) => a.close_approach.miss_distance_km <= state.filters.distanceMax!);
     }
 
     list.sort((a, b) => {

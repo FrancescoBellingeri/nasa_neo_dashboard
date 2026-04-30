@@ -97,6 +97,8 @@ export type SortDirection = "asc" | "desc";
 export interface FeedFilters {
   hazardousOnly: boolean | null;
   nameSearch: string;
+  distanceMin: number | null;
+  distanceMax: number | null;
 }
 
 export interface ApiError {

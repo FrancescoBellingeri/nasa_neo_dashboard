@@ -22,6 +22,11 @@ export default function RootError({ error, reset }: ErrorProps) {
       <p className="text-sm text-muted-foreground font-mono max-w-sm">
         {error.message || "An unexpected error occurred while loading NEO data."}
       </p>
+      {error.digest && (
+        <p className="text-xs text-muted-foreground/50 font-mono">
+          code: {error.digest}
+        </p>
+      )}
       <Button onClick={reset} variant="outline" className="font-mono text-sm gap-2">
         <RefreshCw className="h-4 w-4" /> Try again
       </Button>
