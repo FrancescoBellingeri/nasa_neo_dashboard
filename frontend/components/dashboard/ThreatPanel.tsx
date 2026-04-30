@@ -1,49 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { AlertTriangle, CheckCircle } from "lucide-react";
 
+import { DangerBadge } from "@/components/dashboard/DangerBadge";
 import { Badge } from "@/components/ui/badge";
 import { countdownTo, formatDate, formatKm } from "@/lib/formatters";
 import type { Asteroid } from "@/lib/types";
-
-function DangerRing({ score }: { score: number }) {
-  const r = 18;
-  const circ = 2 * Math.PI * r;
-  const fill = (score / 100) * circ;
-  const color =
-    score >= 60 ? "#ef4444" : score >= 30 ? "#f59e0b" : "#10b981";
-
-  return (
-    <svg width="44" height="44" className="shrink-0 -rotate-90">
-      <circle cx="22" cy="22" r={r} fill="none" stroke="currentColor" strokeWidth="3" className="text-border/40" />
-      <circle
-        cx="22"
-        cy="22"
-        r={r}
-        fill="none"
-        stroke={color}
-        strokeWidth="3"
-        strokeDasharray={`${fill} ${circ}`}
-        strokeLinecap="round"
-      />
-      <text
-        x="22"
-        y="22"
-        textAnchor="middle"
-        dominantBaseline="central"
-        fontSize="9"
-        fontFamily="monospace"
-        fill={color}
-        className="rotate-90"
-        transform="rotate(90, 22, 22)"
-      >
-        {Math.round(score)}
-      </text>
-    </svg>
-  );
-}
 
 function CountdownBadge({ date }: { date: string }) {
   const [label, setLabel] = useState(() => countdownTo(date));
@@ -101,9 +66,11 @@ export function ThreatPanel({ asteroids }: ThreatPanelProps) {
               key={a.id}
               className="flex items-center gap-3 rounded-lg border border-border/30 bg-background/40 px-3 py-2"
             >
-              <DangerRing score={a.danger_score} />
+              <DangerBadge score={a.danger_score} size={44} />
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-foreground truncate">{a.name}</p>
+                <Link href={`/asteroids/${a.id}`} className="text-xs font-semibold text-foreground hover:text-primary transition-colors truncate block">
+                  {a.name}
+                </Link>
                 <p className="text-xs text-muted-foreground">
                   {formatKm(a.close_approach.miss_distance_km)}
                 </p>

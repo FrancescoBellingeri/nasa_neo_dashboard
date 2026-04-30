@@ -8,6 +8,7 @@ import { DistanceTimeline } from "@/components/charts/DistanceTimeline";
 import { HazardDonut } from "@/components/charts/HazardDonut";
 import { SizeHistogram } from "@/components/charts/SizeHistogram";
 import { VelocityChart } from "@/components/charts/VelocityChart";
+import { AsteroidTable } from "@/components/dashboard/AsteroidTable";
 import { DateRangePicker } from "@/components/dashboard/DateRangePicker";
 import { ThreatPanel } from "@/components/dashboard/ThreatPanel";
 import { LiveStatsBar } from "@/components/layout/LiveStatsBar";
@@ -121,8 +122,21 @@ export function DashboardClient({ initialFeed, initialStats }: DashboardClientPr
           />
         </div>
 
-        {/* Table slot — Phase 4 */}
-        <div id="asteroid-table" />
+        {/* Asteroid table */}
+        <AsteroidTable
+          paginated={feed.paginated}
+          filtered={feed.filtered}
+          allAsteroids={feed.data?.asteroids ?? []}
+          isLoading={feed.isLoading}
+          filters={feed.filters}
+          sortField={feed.sortField}
+          sortDir={feed.sortDir}
+          page={feed.page}
+          totalPages={feed.totalPages}
+          onFilterChange={feed.setFilters}
+          onSortChange={feed.setSort}
+          onPageChange={feed.setPage}
+        />
       </main>
     </div>
   );
