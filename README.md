@@ -214,6 +214,7 @@ Create a `.env` file in the backend directory:
 NASA_API_KEY=your_api_key_here
 REDIS_URL=redis://localhost:6379
 ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+LOG_LEVEL=info
 ```
 
 You can obtain a free API key from the official NASA API portal.
@@ -272,7 +273,8 @@ http://localhost:3000
 4. Add env vars in the Render dashboard:
    - `NASA_API_KEY` — get free key at [api.nasa.gov](https://api.nasa.gov)
    - `REDIS_URL` — your Render Redis URL
-   - `ALLOWED_ORIGINS` — your Vercel URL (add after frontend deploy)
+   - `ALLOWED_ORIGINS` — comma-separated frontend URLs (e.g. `https://your-app.vercel.app`) to enable CORS.
+   - `LOG_LEVEL` — set to `error` to see only critical logs in production.
 5. Copy the Render service URL (e.g. `https://nasa-neo-backend.onrender.com`)
 
 ### Frontend → Vercel
