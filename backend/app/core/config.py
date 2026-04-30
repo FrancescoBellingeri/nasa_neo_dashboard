@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     nasa_api_key: str = "DEMO_KEY"
     redis_url: str = "redis://localhost:6379"
     nasa_base_url: str = "https://api.nasa.gov/neo/rest/v1"
+    allowed_origins: str = "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000"
 
     cache_ttl_feed: int = 3600
     cache_ttl_neo: int = 86400

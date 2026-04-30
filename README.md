@@ -29,10 +29,9 @@ The system follows a **client-server architecture**:
 
 * FastAPI
 * HTTPX (async HTTP client)
-* Redis (caching layer)
-* FastAPI Cache
+* Redis (caching layer via aioredis)
+* Pendulum (date and time manipulation)
 * Pydantic Settings (configuration management)
-* Python Dateutil
 
 ### Frontend
 
@@ -42,7 +41,7 @@ The system follows a **client-server architecture**:
 
 ### Deployment
 
-* Backend: Railway / Render / Fly.io
+* Backend: Render
 * Frontend: Vercel
 
 ---
@@ -214,6 +213,7 @@ Create a `.env` file in the backend directory:
 ```
 NASA_API_KEY=your_api_key_here
 REDIS_URL=redis://localhost:6379
+ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 ```
 
 You can obtain a free API key from the official NASA API portal.
@@ -271,7 +271,8 @@ http://localhost:3000
 3. Render creates web service + Redis automatically
 4. Add env vars in the Render dashboard:
    - `NASA_API_KEY` — get free key at [api.nasa.gov](https://api.nasa.gov)
-   - `FRONTEND_URL` — your Vercel URL (add after frontend deploy)
+   - `REDIS_URL` — your Render Redis URL
+   - `ALLOWED_ORIGINS` — your Vercel URL (add after frontend deploy)
 5. Copy the Render service URL (e.g. `https://nasa-neo-backend.onrender.com`)
 
 ### Frontend → Vercel
